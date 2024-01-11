@@ -1,0 +1,139 @@
+//C++
+//
+
+#include <LiquidCrystal.h>
+
+//defining the variables for the smart fire prevention system
+
+int temp1 = A3; //temperature sensor is assigned to the A3 pin
+int redLED = 12; //red led is connected to pin 12
+int greenLED = 11; //green led is connected to pin 11
+int buzzer1 = 6; //the buzzer 1 is connecetd to pin 6
+
+//setting up the liquid crystal lcd 
+LiquidCrystal lcd(2, 3, 4, 8, 9, 10);
+
+
+//defining the variables for the smoke detector system
+
+float temp2; //assigning another temperature sensor
+float temp_data; //stores the data from the temperature sensor on the right 
+float voltage; //used to store the recorded data from temperature sensor to voltage 
+int blueLED = 13; //blue led is connected to pin 13
+int gasSensor; //gas sensor is assigned 
+int buzzer2 = 7; //the buzzer 2 is connected at the pin 7
+int temperature;
+
+void setup() 
+{ 
+Serial.begin(9600); 
+  
+pinMode(buzzer1, OUTPUT); //the buzzer 1 is assigned to smart fire prevention system
+pinMode(redLED, OUTPUT); //the 
+pinMode(greenLED, OUTPUT);
+
+pinMode(A1,INPUT); //the input for the gas sensor for smoke detector system 
+pinMode(A2, INPUT); //the input for the temperature sensor for smoke detector system
+pinMode(blueLED,OUTPUT); //the output for the blue LED is set
+pinMode(buzzer2,OUTPUT); //output for the buzzer2 used for smoke detector system 
+} 
+
+void loop() 
+{ 
+  Serial.begin(9600);
+  Serial.println("Smart Fire Prevention system"); //prints the following statement in the serial monitor
+  lcd.begin(16, 2); //initializes the lcd screen to 16th column and 2 row 
+  lcd.print("Smart Fire Alert"); //prints in the lcd screen 
+  lcd.setCursor(4,1); //sets the cursor to 5th column and 2nd row since the counting starts from 0
+  lcd.print("System!!"); //prints the following statement to the lcd screen
+  delay(2000); //shows the delay of 2 milliseconds
+  lcd.clear(); //function used to clear the lcd screen
+  lcd.print("Temp = ");
+  lcd.setCursor(0,1); //sets the cursor to 1st column and 2nd row 
+  lcd.print("Sprinkler= ");
+  
+//defining the conditions for the smart fire prevention system
+  
+  int value = analogRead(temp1); //defining the variable and reading the temp from the sensor to store in temp1 variable
+  float Temperature = value; //storing the int vlaue to assigned float Temperature variable
+  Serial.print("Air Temperature = "); //printing the statement on the serial monitor
+  Serial.println(Temperature); //printing the value stored in the temperature variable 
+  lcd.setCursor(6,0); //sets the cursor to 7th column and 1st row
+  lcd.print(Temperature); 
+  lcd.setCursor(11,1); //sets the cursor to 12th column and 2nd row 
+  
+//the if condition is used for fire prevention system 
+  
+  //if the temperature is greater than 50 then the following conditions will take place
+  if (Temperature > 50)
+  {
+    digitalWrite(redLED, HIGH); //if condition satisfies true then the red led will turn on indicating danger 
+    digitalWrite(greenLED, LOW); //simultaneously green led will turn off
+    tone(buzzer1,220,100); //the tone of buzzer1 is set 
+    lcd.print("ON "); //since the temperature is high enough to cause fires thus displaying to turn on the sprinklers 
+    Serial.println("Warning! Air temperature is high"); //prints in the serial monitor 
+    Serial.println("Might cause Fire; Switch on water pump"); //prints the alert message
+   }
+  
+  //if the above if condition is not true then the following conditions will take place 
+  else 
+  {
+    noTone(buzzer1); //the tone buzzer is turned off
+    digitalWrite(redLED, LOW); //the red led is turned off
+    digitalWrite(greenLED, HIGH); //the green led is turned on indicating the air temperature is normal 
+    lcd.print("OFF"); //water pump is turned off
+    Serial.println("Air Temperature is fine");
+  }
+  
+   delay(1000); //delay for 1 milliseconds
+  
+//conditions for the smoke detectors 
+  
+temp_data=analogRead(A2); //stores the data from the temperature sesnor 
+voltage=(temp_data/1023)*5000; //converts the temperature data into the voltage
+temp2=(voltage-500)/10; //converts the calculated voltage to the temperature again so that it can be compared
+gasSensor=analogRead(A1); //reads the data from the gas sesnor and it gets stored 
+
+  
+  //following if condition is for leds 
+  
+  //the following if condition states that if the recorded temperature is greater than or equal to 80 then the following conditions will take place
+  if (temp2>=80) 
+{ 
+    //turns on the blue led 
+	digitalWrite(blueLED,HIGH); 
+} 
+  
+  //if condition satisfies incorrect then following condition takes 
+  else 
+{ 
+  //turns off the blue led
+	digitalWrite(blueLED,LOW); 
+} 
+  
+
+//the following if condition is for gas sensor
+  
+//if the gas located near the smoke detector is greater than 100 then the following conditions will take place 
+if (gasSensor>=100) 
+{ 
+	digitalWrite(buzzer2,HIGH); 
+} 
+
+//if the above condition does not satisfies true then the following conditon will take place
+else 
+{ 
+	digitalWrite(buzzer2,LOW); 
+} 
+
+//the following printing statements will print the desired output in the serial monitor
+Serial.print("in Degree C= "); 
+Serial.print(" "); 
+Serial.print(temp2); 
+Serial.println();
+Serial.print("Gas Sensor= "); 
+Serial.print(" "); 
+Serial.print(gasSensor); //prints the value stored in gas sensor
+Serial.println(); 
+delay(1000); 
+}
